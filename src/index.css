@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; 
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155; 
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569; 
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* AI-Mindflicker Inspired Background */
+.bg-mindflicker {
+  background-color: #020617;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.15), transparent 50%),
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.1), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.1), transparent 40%);
+}
+
+/* Glow Effects */
+.shadow-glow-blue {
+  box-shadow: 0 0 20px -5px rgba(59, 130, 246, 0.3);
+}
+.shadow-glow-purple {
+  box-shadow: 0 0 20px -5px rgba(168, 85, 247, 0.3);
+}
+
+/* Text Gradient */
+.text-gradient-main {
+  background: linear-gradient(to right, #60a5fa, #c084fc, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
