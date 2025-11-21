@@ -22,8 +22,8 @@ import {
 } from 'lucide-react';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://aifinb.ai-mindflicker.com';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'wss://aifinb.ai-mindflicker.com';
 
 // --- Helper Functions ---
 
