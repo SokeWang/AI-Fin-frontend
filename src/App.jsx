@@ -724,6 +724,126 @@ const NewsSection = () => {
   );
 };
 
+// Token Sentiment Text Component
+const TokenSentimentText = ({ text, tokenSentiment }) => {
+  if (!tokenSentiment || !tokenSentiment.tokens || tokenSentiment.tokens.length === 0) {
+    return <p className="text-sm text-slate-300 leading-relaxed">{text}</p>;
+  }
+
+  // 将文本拆分成片段，每个token作为一个可渲染的元素
+  const renderTextWithSentiment = () => {
+    const elements = [];
+    let currentPos = 0;
+    const textLength = text.length;
+    
+    // 按position排序tokens
+    const sortedTokens = [...tokenSentiment.tokens].sort((a, b) => a.position - b.position);
+    
+    sortedTokens.forEach((token, index) => {
+      const { position, token: tokenText, score } = token;
+      
+      // 添加token之前的文本
+      if (position > currentPos) {
+        const beforeText = text.substring(currentPos, position);
+        if (beforeText) {
+          elements.push(
+            <span key={`text-${currentPos}`} className="text-slate-300">
+              {beforeText}
+            </span>
+          );
+        }
+      }
+      
+      // 尝试在position位置找到token
+      const tokenLength = tokenText.length;
+      let actualStart = position;
+      let actualEnd = Math.min(position + tokenLength, textLength);
+      let actualTokenText = text.substring(actualStart, actualEnd);
+      
+      // 如果直接匹配失败，尝试在附近搜索（考虑可能的空格或标点）
+      if (actualTokenText.toLowerCase() !== tokenText.toLowerCase()) {
+        const searchRange = 10;
+        let found = false;
+        for (let offset = -searchRange; offset <= searchRange && !found; offset++) {
+          const searchStart = Math.max(0, position + offset);
+          const searchEnd = Math.min(textLength, searchStart + tokenLength);
+          const searchText = text.substring(searchStart, searchEnd);
+          if (searchText.toLowerCase() === tokenText.toLowerCase()) {
+            actualTokenText = searchText;
+            actualStart = searchStart;
+            actualEnd = searchEnd;
+            found = true;
+          }
+        }
+        if (!found) {
+          // 如果还是找不到，使用tokenText本身
+          actualTokenText = tokenText;
+          actualEnd = actualStart + tokenLength;
+        }
+      }
+      
+      // 判断情感方向
+      const isPositive = score > 0.1;
+      const isNegative = score < -0.1;
+      const isNeutral = !isPositive && !isNegative;
+      
+      // 计算条形图宽度（基于score的绝对值，范围0-1映射到0-100%）
+      // 使用更大的倍数使条形图更明显
+      const barWidth = Math.min(Math.abs(score) * 200, 100);
+      
+      elements.push(
+        <span
+          key={`token-${index}`}
+          className="inline-block relative group/token"
+          style={{ marginRight: '2px' }}
+        >
+          <span className="relative z-10">{actualTokenText}</span>
+          {!isNeutral && barWidth > 3 && (
+            <span
+              className={`absolute bottom-0 h-1.5 transition-all duration-300 rounded-sm ${
+                isPositive
+                  ? 'bg-green-500/70 shadow-[0_0_6px_rgba(34,197,94,0.6)] left-0'
+                  : 'bg-red-500/70 shadow-[0_0_6px_rgba(239,68,68,0.6)] right-0'
+              }`}
+              style={{
+                width: `${barWidth}%`,
+              }}
+            />
+          )}
+          {isNeutral && Math.abs(score) > 0.01 && barWidth > 3 && (
+            <span
+              className="absolute bottom-0 left-0 h-0.5 bg-slate-500/40 transition-all duration-300 rounded-sm"
+              style={{ width: `${barWidth}%` }}
+            />
+          )}
+        </span>
+      );
+      
+      currentPos = actualEnd;
+    });
+    
+    // 添加剩余的文本
+    if (currentPos < textLength) {
+      const remainingText = text.substring(currentPos);
+      if (remainingText) {
+        elements.push(
+          <span key={`text-${currentPos}`} className="text-slate-300">
+            {remainingText}
+          </span>
+        );
+      }
+    }
+    
+    return elements;
+  };
+
+  return (
+    <p className="text-sm text-slate-300 leading-relaxed">
+      {renderTextWithSentiment()}
+    </p>
+  );
+};
+
 const SentimentSection = () => {
   const [sentimentData, setSentimentData] = useState({
     tweets: [],
@@ -760,7 +880,7 @@ const SentimentSection = () => {
       {/* Background Glow Effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
       
-      <div id="sentiment-section" className="relative bg-slate-900/40 backdrop-blur-2xl rounded-2xl border border-slate-700/30 shadow-2xl flex flex-col h-full">
+      <div id="sentiment-section" className="relative bg-slate-900/40 backdrop-blur-2xl rounded-2xl border border-slate-700/30 shadow-2xl flex flex-col overflow-hidden" style={{ height: '500px' }}>
         {/* Sentiment Data Header */}
         <div className="p-5 bg-slate-800/30 backdrop-blur-sm border-b border-slate-700/20">
           <div className="flex items-center gap-3">
@@ -819,7 +939,7 @@ const SentimentSection = () => {
                       {tweet.user}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300 leading-relaxed group-hover:text-slate-200 transition-colors">{tweet.text}</p>
+                  <TokenSentimentText text={tweet.text} tokenSentiment={tweet.tokenSentiment} />
                 </div>
               </div>
             ))
